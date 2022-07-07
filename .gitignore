@@ -2,3 +2,4 @@ node_modules
 Pipfile.lock
 test.py
 Pipfile.lock
+xls/.~lock.*
