@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "vue-carousel": "^0.18.0",
     "vue3-carousel": "^0.1.40"
   }
 }
