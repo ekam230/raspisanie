@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="ru">
+    <head>
+      <meta charset="UTF-8">
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+     
+        <title>WebSocket demo</title>
+        <!-- <style type="text/css">
+            body {
+                font-family: "Courier New", sans-serif;
+                text-align: center;
+            }
+            .buttons {
+                font-size: 4em;
+                display: flex;
+                justify-content: center;
+            }
+            .button, .value {
+                line-height: 1;
+                padding: 2rem;
+                margin: 2rem;
+                border: medium solid;
+                min-height: 1em;
+                min-width: 1em;
+            }
+            .button {
+                cursor: pointer;
+                user-select: none;
+            }
+            .minus {
+                color: red;
+            }
+            .plus {
+                color: green;
+            }
+            .value {
+                min-width: 2em;
+            }
+            .state {
+                font-size: 2em;
+            }
+        </style> -->
+        <script src="js/vue.global.js"></script>
+        <link rel="stylesheet" href="css/bulma.min.css">
+    </head>
+    <body>
+        <!-- <div class="buttons">
+            <div class="minus button">-</div>
+            <div class="value">?</div>
+            <div class="plus button">+</div>
+        </div> -->
+        <!-- <div class="state">
+            <span class="users">?</span> online
+        </div> -->
+        <!-- <div>
+            <span class="list_data">
+
+            </span>
+        </div> -->
+        <div id="app">
+        <!-- <ul id="v-for-object" class="demo"> -->
+            <!-- <li v-for="(items, index) in myObject">
+                <span v-for="item in items" v-bind:key="item.id" v-bind:title="item.name">&nbsp;{{item}}&nbsp;</span>
+        
+            </li>
+            <button v-on:click="sendMessage({'action': 'plus'})">Send Message</button> -->
+        <!-- </ul> -->
+
+          <!-- <div id="components-demo">
+            <button-counter></button-counter>
+            <button-counter></button-counter>
+            <button-counter></button-counter>
+          </div> -->
+          <div id="time" class="columns">
+              <div class="column is-2
+              is-offset-10 is-size-2">
+              <div class="is-size-4">Текущее время</div>
+                <real-time></real-time>
+              </div>            
+            </div>
+            
+          <div id="blog-posts-demo">
+              <div class="columns has-text-centered is-size-3">
+            <div class="column is-2">Оператор</div>
+            <div class="column is-4">Название</div>
+            <div class="column">Направление</div>
+            <div class="column is-1">Время</div>
+            <div class="column is-1">Причал</div></div>
+            <blog-post
+              v-for="item in myObject"
+              :key="item.id"
+              :name="item.name"
+              :operator="item.operator"
+              :time="item.time"
+              :path="item.path"
+              :terminal="item.terminal" class="has-text-centered is-size-3"
+            ></blog-post>
+          </div>    
+
+        </div>     
+        <script>
+            //var minus = document.querySelector('.minus'),
+            //    plus = document.querySelector('.plus'),
+            //    value = document.querySelector('.value'),
+            //    users = document.querySelector('.users'),
+            //    list_data = document.querySelector('.list_data'),
+            //    websocket = new WebSocket("ws://127.0.0.1:6789/");
+            //minus.onclick = function (event) {
+            //    websocket.send(JSON.stringify({action: 'minus'}));
+            //}
+            //plus.onclick = function (event) {
+            //    websocket.send(JSON.stringify({action: 'plus'}));
+            //}
+            //websocket.onmessage = function (event) {
+            //    data = JSON.parse(event.data);
+            //    console.log(data);
+            //    switch (data.type) {                    
+            //        case 'state':
+            //            value.textContent = data.value;
+            //            break;
+            //        case 'list_data': 
+            //            ////list_data.textContent = data.type+' '+data[1].id;
+            //            list = new Array(data);
+            //            list.pop();
+            //            console.log(list);
+                         //for (key in data) {
+                         //    console.log(data[key]) 
+                         //    items = data[key];
+                            // items.forEach(item => {
+                            //    document.write(`<li>${item.type} <span style="color: #1a55cc">${item.id}</span> 
+                            //           is ${item.name} years old.</li>`);
+                            // })
+                            //}
+                                
+                                //list_data.innerHTML +=data[key]
+                        //break;
+                        //case 'users':
+                        //users.textContent = (
+                        //data.count.toString() + " user" +
+                        //(data.count == 1 ? "" : "s"));
+                        //break;
+                        //default:
+                        //console.error(
+                        //"unsupported event", data);
+                        //}
+                        //};
+            const App = Vue.createApp({                
+                data() {
+                  return {
+                      connection: null,
+                        myObject: {},
+                  }
+                },
+                created: function() {
+                    console.log("Starting connection to WebSocket Server")
+                    this.connection = new WebSocket("ws://127.0.0.1:6789/")
+                    var vm = this;
+                    this.connection.onmessage = function(event) {
+                      //console.log(event);
+                      result = JSON.parse(event.data);
+                      
+                      if (result.type == "list_data") {
+                        delete result.type;
+                        vm.myObject = result;
+                      }                      
+                    }
+                
+                    this.connection.onopen = function(event) {
+                      console.log(event)
+                      console.log("Successfully connected to the echo websocket server...")
+                    }
+                
+                  },
+                  methods: {
+                    sendMessage: function(message) {
+                      console.log(this.connection);
+                      this.connection.send(JSON.stringify(message));
+                    }
+                  },
+              })
+
+    App.component('button-counter', {
+    data() {
+        return {
+            count: 0
+        }
+    },
+    template: `
+    <button @click="count++">
+    Счётчик кликов — {{ count }}
+    </button>`
+    })
+    
+    App.component('blog-post', {
+        props: ['id','name','time','operator','path','terminal'],
+        template: `<div class="columns ">            
+            <div class="column is-2">
+              {{operator}}
+            </div>
+            <div class="column is-4 has-text-centered">
+              {{name}}
+            </div>
+            <div class="column">
+              {{path}}
+            </div>
+            <div class="column is-1">
+              {{time}}
+            </div>
+            <div class="column is-1">
+                {{terminal}}
+              </div>
+          </div>`
+      })
+
+    App.component('real-time',{
+        data() {
+            return {
+              interval: null,
+              time: null,
+              date: null
+            }
+          },
+          beforeDestroy() {
+            // prevent memory leak
+            clearInterval(this.interval)
+          },
+          created() {
+            // update the time every second
+            this.interval = setInterval(() => {
+              // Concise way to format time according to system locale.
+              // In my case this returns "3:48:00 am"
+              this.time = Intl.DateTimeFormat(navigator.language, {
+                hour: 'numeric',
+                minute: 'numeric',
+                second: 'numeric'
+              }).format();
+              this.date = Intl.DateTimeFormat().format()
+            }, 1000)
+          },
+        template: `{{time}} <br> {{date}}
+        `,
+        
+    })
+    App.mount('#app');
+
+ 
+        </script>
+    </body>
+</html>
