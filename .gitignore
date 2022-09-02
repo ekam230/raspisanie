@@ -127,6 +127,11 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
-=======
 
 node_modules
+
+Pipfile.lock
+test.py
+Pipfile.lock
+xls/.~lock.*
+Pipfile.lock

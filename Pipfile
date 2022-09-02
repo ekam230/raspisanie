@@ -5,6 +5,9 @@ name = "pypi"
 
 [packages]
 websockets = "*"
+watchdog = "*"
+pandas = "*"
+openpyxl = "*"
 
 [dev-packages]
 

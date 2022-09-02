@@ -1,12 +1,9 @@
 #!/usr/bin/env python
-
-# WS server example that synchronizes state across clients
-
 import asyncio
 import json
 import logging
 import websockets
-
+import pandas 
 import datetime
 
 logging.basicConfig()
@@ -17,7 +14,13 @@ USERS = set()
 
 SMS = {"id": 8,"time":"01:19","name":"Александр Пушкин","operator":"Водоход","terminal":7,"path":"Москва-соловки7-москва"}
 
-MESSAGE = {0:{"id": 1,"time":"01:19","name":"Александр Пушкин","operator":"Водоход","terminal":5,"path":"Москва-соловки2-москва"},2:{"id": 2,"time":"01:19","name":"Октябрьская революция","operator":"Гама","terminal":5,"path":"Астрахань-Москва"},3:{"id": 2,"time":"01:19","name":"Сергей Есенин","operator":"Гама","terminal":5,"path":"Москва-соловки-москва"},4:{"id": 2,"time":"01:19","name":"Михаил Булгаков","operator":"Гама","terminal":5,"path":"Москва-соловки-москва"},5:{"id": 2,"time":"01:19","name":"Феликс Дзержинский","operator":"Гама","terminal":5,"path":"Москва-соловки-москва"},6:{"id": 2,"time":"01:19","name":"Михаил Танич","operator":"Гама","terminal":5,"path":"Москва-соловки-москва"}}
+
+excel_data_df = pandas.read_excel('xls/отправление.xlsx') 
+# json_str = excel_data_df.to_json(orient='records')
+
+# MESSAGE = {0:{"id": 1,"time":"01:19","name":"Александр Пушкин","operator":"Водоход","terminal":5,"path":"Москва-соловки2-москва"},2:{"id": 2,"time":"01:19","name":"Октябрьская революция","operator":"Гама","terminal":5,"path":"Астрахань-Москва"},3:{"id": 2,"time":"01:19","name":"Сергей Есенин","operator":"Гама","terminal":5,"path":"Москва-соловки-москва"},4:{"id": 2,"time":"01:19","name":"Михаил Булгаков","operator":"Гама","terminal":5,"path":"Москва-соловки-москва"},5:{"id": 2,"time":"01:19","name":"Феликс Дзержинский","operator":"Гама","terminal":5,"path":"Москва-соловки-москва"},6:{"id": 2,"time":"01:19","name":"Михаил Танич","operator":"Гама","terminal":5,"path":"Москва-соловки-москва"}}
+Message = excel_data_df.to_dict(orient='index')
+print (Message)
 
 
 def state_event():
@@ -25,7 +28,8 @@ def state_event():
 
 
 def state_event2():
-    return json.dumps({"type": "list_data", **MESSAGE})
+    pass
+    return json.dumps({"type": "list_data", **Message})
 
 
 def users_event():
@@ -78,7 +82,7 @@ async def task_manager():
         except asyncio.CancelledError:
             break # Выходим из цикла, если задачу отменили
         counter += 1
-        print("I'm a task manager {} {}!".format(counter,MESSAGE))
+        print("I'm a task manager {} {}!".format(counter,Message))
 
 
 async def user_io():
@@ -87,22 +91,27 @@ async def user_io():
     while True:
         # Запускаем input() в отдельном потоке и ждём его завершения
         command = await loop.run_in_executor(None, input, 'Для выхода введите C:\n')
+        global Message 
         if command.lower() == 'c':
             shutdown() # Отменяем все задачи
             break      # и выходим из цикла
         elif command.lower() == 'obj':
-            print(MESSAGE)
+            print(Message)
+        elif command.lower() == 'u':
+            excel_data_df = pandas.read_excel('xls/отправление.xlsx') 
+            Message = excel_data_df.to_dict(orient='index')
+            print('eto vivod',Message)
+            await notify_state2()
         else:
-            i = len(MESSAGE)
+            i = len(Message)
             try:
-                MESSAGE[i+1] = {"id": 8,"time":"01:19","name":"Александр Пушкин","operator":"Водоход","terminal":7,"path":"Москва-соловки7-москва"}
+                Message[i+1] = {"id": 8,"time":"01:19","name":"Александр Пушкин","operator":"Водоход","terminal":7,"path":"Москва-соловки7-москва"}
                 # result = json.dumps(command)
                 # MESSAGE[i+1]= json.loads(command)
                 # print(MESSAGE2)
             except: pass
             await notify_state2()
-
-
+            
 async def counter(websocket, path):
     # register(websocket) sends user_event() to websocket
     await register(websocket)
@@ -125,11 +134,13 @@ async def counter(websocket, path):
 
 start_server = websockets.serve(counter, "localhost", 6789)
 
-main_task = asyncio.wait([user_io(), start_server]) #main_task = asyncio.wait([user_io(), task_manager(), start_server])
-asyncio.get_event_loop().run_until_complete(main_task)
-asyncio.get_event_loop().run_forever()
+
+if __name__ == "__main__":
+    main_task = asyncio.wait([user_io(), start_server,]) #main_task = asyncio.wait([user_io(), task_manager(), start_server])
+    asyncio.get_event_loop().run_until_complete(main_task)
+    asyncio.get_event_loop().run_forever()
 
 # if __name__ == "__main__":
-#     loop = asyncio.new_event_loop()
-#     asyncio.set_event_loop(loop)
-#     loop.run_until_complete(main_task)
+    # loop = asyncio.new_event_loop()
+    # asyncio.set_event_loop(loop)
+    # loop.run_until_complete(main_task)
