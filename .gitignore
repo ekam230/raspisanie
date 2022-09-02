@@ -130,9 +130,5 @@ dmypy.json
 
 node_modules/
 
-Pipfile.lock
 test.py
-Pipfile.lock
 xls/.~lock.*
-Pipfile.lock
-package-lock.json
